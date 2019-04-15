@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application/common/event_bus.dart';
 import 'package:flutter_application/constants/constants.dart';
 import 'package:flutter_application/pages/login_web_page.dart';
+import 'package:flutter_application/pages/my_message_page.dart';
+import 'package:flutter_application/utils/data_utils.dart';
+import 'package:flutter_application/utils/net_utils.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -39,12 +44,12 @@ class _ProfilePageState extends State<ProfilePage> {
     //尝试显示用户信息
     _showUserInfo();
     eventBus.on<LoginEvent>().listen((event) {
-      //TODO
       //获取用户信息并显示
+      _getUserInfo();
     });
     eventBus.on<LogoutEvent>().listen((event) {
-      //TODO
       //清除登陆信息
+      _showUserInfo();
     });
   }
 
@@ -61,7 +66,17 @@ class _ProfilePageState extends State<ProfilePage> {
             title: Text(menuTitles[index]),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {
-              //TODO
+              DataUtils.isLogin().then((isLogin){
+                if(isLogin){
+                  switch(index){
+                    case 0:
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context)=>MyMessagePage()));
+                      break;
+                  }
+                }else{
+                  _login();
+                }
+              });
             },
           );
         },
@@ -73,7 +88,19 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   _showUserInfo() {
-    //
+    DataUtils.getUserInfo().then((user){
+      if(mounted){
+        setState(() {
+          if(user!=null){
+            userAvatar = user.avatar;
+            userName = user.name;
+          }else{
+            userAvatar = null;
+            userName = null;
+          }
+        });
+      }
+    });
   }
 
   Widget _buildHeader() {
@@ -123,5 +150,29 @@ class _ProfilePageState extends State<ProfilePage> {
       //登陆成功
       eventBus.fire(LoginEvent());
     }
+  }
+
+  _getUserInfo() {
+      DataUtils.getAccessToken().then((accessToken){
+        if(accessToken==null || accessToken.length==0){
+          return;
+        }
+        Map<String,dynamic> params = new Map<String,dynamic>();
+        params['access_token'] = accessToken;
+        params['dataType'] = 'json';
+        print('accessToken: $accessToken');
+        NetUtils.get(AppUrls.OPENAPI_USER, params).then((data){
+          //{"gender":"male","name":"Damon2019","location":"湖南 长沙","id":2006874,"avatar":"https://oscimg.oschina.net/oscnet/up-21zvuaor7bbvi8h2a4g93iv9vve2wrnz.jpg!/both/50x50?t=1554975223000","email":"3262663349@qq.com","url":"https://my.oschina.net/damon007"}
+          print('data: $data');
+          Map<String,dynamic> map = json.decode(data);
+          if(mounted){
+            setState(() {
+              userAvatar = map['avatar'];
+              userName = map['name'];
+            });
+          }
+          DataUtils.saveUserInfo(map);
+        });
+      });
   }
 }
