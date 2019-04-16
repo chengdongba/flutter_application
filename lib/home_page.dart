@@ -53,8 +53,8 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         elevation: 0.0,
         title: Text(_appbarTitle[_currentIndex],
-          style: TextStyle(color: Color(AppColors.APP_THEME)),),
-        iconTheme: IconThemeData(color: Color(AppColors.APP_THEME)),
+          style: TextStyle(color: Color(AppColors.APP_BAR)),),
+        iconTheme: IconThemeData(color: Color(AppColors.APP_BAR)),
       ),
       body: PageView.builder(
           physics: NeverScrollableScrollPhysics(),//禁止滑动
