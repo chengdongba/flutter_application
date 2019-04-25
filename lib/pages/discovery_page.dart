@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-//import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter_application/pages/common_web_page.dart';
 import 'package:flutter_application/pages/shake_page.dart';
 
 class DiscoveryPage extends StatefulWidget {
   @override
-  _DiscoveryPageState createState() => new _DiscoveryPageState();
+  _DiscoveryPageState createState() => _DiscoveryPageState();
 }
 
 class _DiscoveryPageState extends State<DiscoveryPage> {
-
   List<Map<String, IconData>> blocks = [
     {
       '开源众包': Icons.pageview,
@@ -27,17 +26,44 @@ class _DiscoveryPageState extends State<DiscoveryPage> {
     }
   ];
 
-//  Future scan() async {
-//    String barcode = await BarcodeScanner.scan();
-//  }
+  Future scan() async {
+    String barcode = await BarcodeScanner.scan();
+    print('barcode: $barcode');
+  }
 
+  void _handleItemClick(String title) {
+    switch (title) {
+      case '开源众包':
+        _navToWebPage(title, 'https://zb.oschina.net/');
+        break;
+      case '扫一扫':
+        scan();
+        break;
+      case '摇一摇':
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => ShakePage()));
+        break;
+    }
+  }
+
+  void _navToWebPage(String title, String url) {
+    if (title != null && url != null) {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => CommonWebPage(
+            title: title,
+            url: url,
+          )));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
         itemCount: blocks.length,
-        itemBuilder: (BuildContext context, int blockIndex) {
+        itemBuilder: (context, bolockIndex) {
           return Container(
+//            height: 200.0,
+//            color: Color(0xffff0000),
             margin: const EdgeInsets.symmetric(vertical: 10.0),
             decoration: BoxDecoration(
               border: Border(
@@ -53,62 +79,34 @@ class _DiscoveryPageState extends State<DiscoveryPage> {
             ),
             child: ListView.separated(
                 physics: NeverScrollableScrollPhysics(),
+                //滑动冲突
                 shrinkWrap: true,
-                itemBuilder: (BuildContext context, int mapIndex) {
+                itemBuilder: (context, mapIndex) {
                   return InkWell(
                     onTap: () {
                       _handleItemClick(
-                        blocks[blockIndex].keys.elementAt(mapIndex),
-                      );
+                          blocks[bolockIndex].keys.elementAt(mapIndex));
                     },
                     child: Container(
                       height: 60.0,
                       child: ListTile(
                         leading: Icon(
-                            blocks[blockIndex].values.elementAt(mapIndex)),
+                            blocks[bolockIndex].values.elementAt(mapIndex)),
                         title:
-                        Text(blocks[blockIndex].keys.elementAt(mapIndex)),
+                        Text(blocks[bolockIndex].keys.elementAt(mapIndex)),
                         trailing: Icon(Icons.arrow_forward_ios),
                       ),
                     ),
                   );
                 },
-                separatorBuilder: (context,index){
+                separatorBuilder: (context, mapIndex) {
                   return Divider(
                     height: 2.0,
                     color: Color(0xffff0000),
                   );
                 },
-                itemCount: blocks[blockIndex].length,
-            ),
+                itemCount: blocks[bolockIndex].length),
           );
-        }
-    );
+        });
   }
-
-  void _handleItemClick(String title) {
-    switch (title) {
-      case '开源众包':
-        _navToWebPage(title, 'https://zb.oschina.net/');
-        break;
-      case '扫一扫':
-//        scan();
-        break;
-      case '摇一摇':
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => ShakePage()));
-        break;
-    }
-  }
-
-  void _navToWebPage(String title, String url) {
-    if (title != null && url != null) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
-          CommonWebPage(
-            title: title,
-            url: url,
-          )));
-    }
-  }
-
 }

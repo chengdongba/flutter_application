@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
       drawer: MyDrawer(
           headImgPath: 'assets/images/cover_img.jpg',
           menuIcons: [Icons.send,Icons.home,Icons.error,Icons.settings],
-          menuTitles: ['发不动弹','动弹小黑屋','关于','设置'],),
+          menuTitles: ['发布动弹','动弹小黑屋','关于','设置'],),
     );
   }
 }

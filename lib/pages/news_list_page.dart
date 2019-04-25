@@ -7,7 +7,7 @@ import 'package:flutter_application/constants/constants.dart';
 import 'package:flutter_application/pages/login_web_page.dart';
 import 'package:flutter_application/utils/data_utils.dart';
 import 'package:flutter_application/utils/net_utils.dart';
-import 'package:flutter_application/widgets/NewsListItem.dart';
+import 'package:flutter_application/widgets/news_list_item.dart';
 
 class NewsListPage extends StatefulWidget {
   @override
@@ -19,14 +19,25 @@ class _NewsListPageState extends State<NewsListPage> {
   bool isLogin = false;
   int curPage = 1;
   List newsList;
+  ScrollController _contraller = ScrollController();
 
   @override
   void initState() {
     super.initState();
+
+    _contraller.addListener((){
+      var maxScroll = _contraller.position.maxScrollExtent;
+      var pixels = _contraller.position.pixels;
+      if(maxScroll == pixels){
+        curPage++;
+        getNewsList(true);
+      }
+    });
+
     DataUtils.isLogin().then((isLogin) {
       if (!mounted) return;
       setState(() {
-        isLogin = isLogin;
+        this.isLogin = isLogin;
       });
     });
     eventBus.on<LoginEvent>().listen((event) {
@@ -36,6 +47,12 @@ class _NewsListPageState extends State<NewsListPage> {
       });
       //获取新闻列表
       getNewsList(false);
+    });
+    eventBus.on<LogoutEvent>().listen((event){
+      if(!mounted) return;
+      setState(() {
+        this.isLogin = false;
+      });
     });
   }
 
@@ -74,7 +91,7 @@ class _NewsListPageState extends State<NewsListPage> {
         DataUtils.getAccessToken().then((accessToken) {
           if (accessToken != null && accessToken.length != 0) {
             Map<String, dynamic> params = new Map();
-            params['accessToken'] = accessToken;
+            params['access_token'] = accessToken;
             params['dataType'] = 'json';
             params['catalog'] = 1;
             params['page'] = curPage;
